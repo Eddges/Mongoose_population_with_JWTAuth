@@ -3,22 +3,25 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session = require('express-session')
+var FileStore = require('session-file-store')(session)
+var passport = require('passport')
+var authenticate = require('./authenticate')
+var config = require('./config')
 
-
-
+var users = require('./routes/userRouter')
 var dishRouter = require('./routes/dishRouter')
 var leaderRouter = require('./routes/leaderRouter')
 var promoRouter = require('./routes/promoRouter')
-
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// var userRouter = require('./routes/userRouter');
 
 var app = express();
 
 const mongoose = require('mongoose');
 const Dishes = require('./models/dishes');
 const { EROFS, EDESTADDRREQ } = require('constants');
-const dburl = 'mongodb://127.0.0.1:27017/conFusion';
+const dburl = config.mongoURL;
 
 const connect = mongoose.connect(dburl);
 
@@ -33,50 +36,21 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('12345-98762-45678-09765'));
 
-const auth = (req, res, next) => {
-  console.log(req.signedCookies)
-  if(req.signedCookies.user==='admin'){
-    next()
-  }
-  else if(req.signedCookies.user!=='admin'){
-    let err = new Error('Cookies not admin')
-    res.setHeader('WWW-Authenticate', 'Basic')
-    res.statusCode = 401
-    next(err)
-  }
-  else if(req.signedCookies.user && req.signedCookies.user!=='admin'){
-    if(!req.headers.authorization){
-      res.setHeader('WWW-Authenticate', 'Basic')
-      let error = new Error('No cookie')
-      res.statusCode = 401
-      next(err)
-    }
-    else{
-      let authUser = new Buffer.from(req.headers.authorization.split(' ')[1], 'base64').toString().split(':')
-      if(authUser[0]==='admin' && authUser[1]==='kek'){
-        res.cookie('user', 'admin', {signed : true})
-        next()
-      }
-      else{
-        res.setHeader('WWW-Authenticate', 'Basic')
-      let error = new Error('Incorrect Login ID or password')
-      res.statusCode = 401
-      next(err)
-      }
-    }
-  }
-}
+
+//Initializing passport, meaning everything will not pass through this middleware
+//In authenticate.js, we have used passport.use(), which means ki every request will pass
+//through passport before accessing even '/'
+app.use(passport.initialize())
+
+app.use('/', indexRouter);
+app.use('/users', users);
 
 
 
-app.use(auth)
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/dishes', dishRouter)
 app.use('/promotions', promoRouter)
 app.use('/leaders', leaderRouter)
