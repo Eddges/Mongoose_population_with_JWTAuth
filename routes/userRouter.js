@@ -21,8 +21,9 @@ userRouter.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(
 
 })
 
-
-
+//The signup process will be the same, we will create a new user and 
+//verify it using passport.authenticate
+//But since we are not using sessions, hence no cookies/session is generated
 userRouter.post('/signup', (req, res, next) => {
   User.register(new User({username : req.body.username}), req.body.password, (err, user) => {
     if(err) {
@@ -51,7 +52,10 @@ userRouter.post('/signup', (req, res, next) => {
 })
 
 
-
+//In the login process, we first check if the details are correct
+//If they are, we create a token with authenticate.getToken by passing
+//the specific user details to it (the id in this case) and the function getToken
+//will return a signed token with id parameter, secret key and expiration
 userRouter.post('/login', passport.authenticate('local'), (req, res, next) => {
     console.log('local authentication successful')
     var token = authenticate.getToken({_id : req.user._id})
