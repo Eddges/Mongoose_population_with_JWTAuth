@@ -18,6 +18,8 @@ var indexRouter = require('./routes/index');
 
 var app = express();
 
+const hostname = 'localhost'
+
 const mongoose = require('mongoose');
 const Dishes = require('./models/dishes');
 const { EROFS, EDESTADDRREQ } = require('constants');
@@ -28,6 +30,18 @@ const connect = mongoose.connect(dburl);
 connect.then((db) => {
   console.log('Connected to the server')
 }, (err) => {console.log(err)})
+
+
+app.use('*', (req, res, next) => {
+  if(req.secure){
+    return next()
+  }
+  else{
+    console.log('url', req.url)
+    res.redirect('https://'+req.hostname+':'+app.get('secPort')+req.url)
+  }
+})
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
