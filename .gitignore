@@ -1,4 +1,6 @@
 node_modules
 
-./bin/certificate.pem
-./bin/private.key
+
+bin/cert.csr
+bin/certificate.pem
+bin/private.key
