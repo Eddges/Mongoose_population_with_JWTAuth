@@ -3,11 +3,12 @@ var userRouter = express.Router();
 var bodyParser = require('body-parser')
 var passport = require('passport')
 var authenticate = require('../authenticate')
+var cors = require('./cors')
 
 userRouter.use(bodyParser.json())
 var User = require('../models/users')
 
-userRouter.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
+userRouter.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
   // res.send('respond with a resource');
   User.find({})
   .then(users => {
@@ -24,7 +25,7 @@ userRouter.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(
 //The signup process will be the same, we will create a new user and 
 //verify it using passport.authenticate
 //But since we are not using sessions, hence no cookies/session is generated
-userRouter.post('/signup', (req, res, next) => {
+userRouter.post('/signup', cors.corsWithOptions, (req, res, next) => {
   User.register(new User({username : req.body.username}), req.body.password, (err, user) => {
     if(err) {
       res.statusCode = 500
@@ -56,7 +57,7 @@ userRouter.post('/signup', (req, res, next) => {
 //If they are, we create a token with authenticate.getToken by passing
 //the specific user details to it (the id in this case) and the function getToken
 //will return a signed token with id parameter, secret key and expiration
-userRouter.post('/login', passport.authenticate('local'), (req, res, next) => {
+userRouter.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res, next) => {
     console.log('local authentication successful')
     var token = authenticate.getToken({_id : req.user._id})
     console.log('token creation successful')

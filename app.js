@@ -14,6 +14,7 @@ var dishRouter = require('./routes/dishRouter')
 var leaderRouter = require('./routes/leaderRouter')
 var promoRouter = require('./routes/promoRouter')
 var indexRouter = require('./routes/index');
+var uploadRouter = require('./routes/uploadRouter')
 // var userRouter = require('./routes/userRouter');
 
 var app = express();
@@ -23,6 +24,7 @@ const hostname = 'localhost'
 const mongoose = require('mongoose');
 const Dishes = require('./models/dishes');
 const { EROFS, EDESTADDRREQ } = require('constants');
+const userRouter = require('./routes/userRouter');
 const dburl = config.mongoURL;
 
 const connect = mongoose.connect(dburl);
@@ -58,7 +60,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize())
 
 app.use('/', indexRouter);
-app.use('/users', users);
+app.use('/users', userRouter);
 
 
 
@@ -68,6 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/dishes', dishRouter)
 app.use('/promotions', promoRouter)
 app.use('/leaders', leaderRouter)
+app.use('/uploadImage', uploadRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
