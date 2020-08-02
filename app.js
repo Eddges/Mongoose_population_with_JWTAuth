@@ -15,7 +15,7 @@ var leaderRouter = require('./routes/leaderRouter')
 var promoRouter = require('./routes/promoRouter')
 var indexRouter = require('./routes/index');
 var uploadRouter = require('./routes/uploadRouter')
-// var userRouter = require('./routes/userRouter');
+var favoriteRouter = require('./routes/favoriteRouter')
 
 var app = express();
 
@@ -54,9 +54,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 
-//Initializing passport, meaning everything will not pass through this middleware
-//In authenticate.js, we have used passport.use(), which means ki every request will pass
-//through passport before accessing even '/'
 app.use(passport.initialize())
 
 app.use('/', indexRouter);
@@ -71,6 +68,7 @@ app.use('/dishes', dishRouter)
 app.use('/promotions', promoRouter)
 app.use('/leaders', leaderRouter)
 app.use('/uploadImage', uploadRouter)
+app.use('/favorites', favoriteRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
